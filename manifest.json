@@ -1,0 +1,12 @@
+{
+   "name": "LocalPin",
+   "version": "1.0.1",
+   "description": "Pin messages locally",
+   "authors": [
+      {
+         "name": "mafu",
+         "id": "519760564755365888"
+      }
+   ],
+   "color": "#ccffe5"
+}
