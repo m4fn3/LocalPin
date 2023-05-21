@@ -1,5 +1,5 @@
 import {Plugin, registerPlugin} from 'enmity/managers/plugins'
-import {Locale, Native, React, Toasts, Messages} from 'enmity/metro/common'
+import {Locale, React, Toasts} from 'enmity/metro/common'
 import {FormRow, View} from "enmity/components"
 import {create} from 'enmity/patcher'
 // @ts-ignore
@@ -9,8 +9,7 @@ import {bulk, filters} from "enmity/metro"
 import {findInReactTree} from "enmity/utilities"
 import {getIDByName} from "enmity/api/assets"
 import {addLocalPin, getLocalPin, initPin, removeLocalPin, updatePin} from "./utils/pins"
-import {get, set} from "enmity/api/settings"
-import {patchActionSheet} from "../../hook";
+import {patchActionSheet} from "../../hook"
 
 const Patcher = create('LocalPin')
 
