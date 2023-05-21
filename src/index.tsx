@@ -50,9 +50,10 @@ const LocalPin: Plugin = {
 
         // --- Huge thanks to Rosie for this ActionSheet patch <3 ---
         function patchActionSheet(meta, res) {
-            let isPinned = meta.message.pinned
+            let isPinned = meta.message?.pinned
             if (isPinned) return
             const finalLocation = findInReactTree(res, r => Array.isArray(r) && r.find(o => typeof o?.key === "string" && typeof o?.props?.message === "string"))
+            if (!finalLocation) return
             let isLocalPinned = getLocalPin(meta.channel.id).includes(meta.message.id)
             const button = <FormRow
                 label={`${isLocalPinned ? "Unpin" : "Pin"} Message Locally`}
