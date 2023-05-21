@@ -10,22 +10,17 @@ import {findInReactTree} from "enmity/utilities"
 import {getIDByName} from "enmity/api/assets"
 import {addLocalPin, getLocalPin, initPin, removeLocalPin, updatePin} from "./utils/pins"
 import {get, set} from "enmity/api/settings"
+import {patchActionSheet} from "../../hook";
 
 const Patcher = create('LocalPin')
 
 const [
-    ActionSheet,
-    ActionSheetNew,
     LazyActionSheet,
 ] = bulk(
-    filters.byProps("EmojiRow"),
-    filters.byName("ActionSheet", false),
-    filters.byProps("openLazy", "hideActionSheet"),
-    filters.byProps("getMessage", "getMessages")
+    filters.byProps("openLazy", "hideActionSheet")
 )
 
 
-const {Version} = Native.InfoDictionaryManager
 const PinIcon = getIDByName("ic-location")
 
 const LocalPin: Plugin = {
@@ -48,8 +43,9 @@ const LocalPin: Plugin = {
             }
         })
 
-        // --- Huge thanks to Rosie for this ActionSheet patch <3 ---
-        function patchActionSheet(meta, res) {
+        // --- Huge thanks to Rosie for ActionSheet patch <3 ---
+        function patch(args, res) {
+            const meta = args[0]
             let isPinned = meta.message?.pinned
             if (isPinned) return
             const finalLocation = findInReactTree(res, r => Array.isArray(r) && r.find(o => typeof o?.key === "string" && typeof o?.props?.message === "string"))
@@ -78,26 +74,11 @@ const LocalPin: Plugin = {
                 }}
             />
             let elementCopyText = finalLocation.filter(b => b.props?.message === Locale.Messages.MESSAGE_ACTION_REPLY) // find an index to insert the button filtering by a localized string
-            let pos = elementCopyText ? (elementCopyText.length ? Number(elementCopyText[0].key) + 1 : undefined) : 2 // FormRow components start with index 1
-            if (pos) {
-                finalLocation.splice(pos, 0, button)
-            }
+            let pos = elementCopyText?.length ? Number(elementCopyText[0].key) + 1 : 2 // FormRow components start with index 1
+            finalLocation.splice(pos, 0, button)
         }
 
-        if (parseInt(Version.substring(0, 3)) > 164) {
-            typeof ActionSheetNew.default === 'function' && Patcher.after(ActionSheetNew, "default", (_, __, res) => {
-                const FinalLocation = findInReactTree(res, r => r.sheetKey)
-                if (FinalLocation?.sheetKey !== "MessageLongPressActionSheet") return
-                Patcher.after(FinalLocation?.content, "type", (_, [meta], res) => {
-                    patchActionSheet(meta, res)
-                })
-            })
-        } else {
-            typeof ActionSheet.default === 'function' && Patcher.after(ActionSheet, "default", (_, [meta], res) => {
-                patchActionSheet(meta, res)
-            })
-        }
-        // ------------------------------------------------------
+        patchActionSheet(Patcher, "MessageLongPressActionSheet", patch)
     },
     onStop() {
         Patcher.unpatchAll()
